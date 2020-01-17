@@ -1,0 +1,836 @@
+//PROGRAM RESPONSI
+#include <iostream>
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+using namespace std;
+
+struct tree_node
+	{
+		tree_node* left;
+		tree_node* right;
+		int data;
+	};
+
+tree_node* root;
+
+bool isEmpty()
+	{return root==NULL;}
+
+void insert(int d)
+{
+	tree_node* t = new tree_node;
+	tree_node* parent;
+	t->data = d;
+	t->left = NULL;
+	t->right = NULL;
+	parent = NULL;
+	if(isEmpty())root = t;
+	else
+	{
+		tree_node* curr;
+		curr = root;
+
+		while(curr!=NULL)
+		{
+			parent = curr;
+			if(t->data > curr->data) curr = curr->right;
+			else curr = curr->left;
+		}
+
+		if(t->data < parent->data)
+			parent->left = t;
+		else
+		parent->right = t;
+	}
+}
+
+void inorder(tree_node* p)
+	{
+		if(p!=NULL)
+		{
+			if(p->left)
+			inorder(p->left);
+			cout<<" "<<p->data<<" ";
+			if(p->right)
+			inorder(p->right);
+		}
+		else
+		return;
+	}
+
+void postorder(tree_node* p)
+    {
+        if(p!=NULL)
+        {
+            postorder(p->left);
+            postorder(p->right);
+            cout<<" "<<p->data<<" ";
+        }
+              
+        else
+            return;
+    }
+
+void preorder(tree_node* p)
+{
+    if(p != NULL)
+    {
+        cout<<" "<<p->data<<" ";   
+        if(p->left)
+            preorder(p->left);
+        if(p->right)
+            preorder(p->right);
+    }
+
+    else
+        return;
+}
+
+void print_inorder()
+	{
+		inorder(root);
+	}
+
+void print_preorder()
+{
+    preorder(root);
+}
+
+void print_postorder()
+{
+	postorder(root);
+}
+
+void delette(tree_node* p, int del)
+{
+       tree_node* curr;
+       tree_node* parent;
+       curr = root;
+
+       bool flag = false;
+  
+       while(curr != NULL)
+       {
+              if(curr->data == del)
+              {
+                     flag = true;
+                     //cout<<"Data ditemukan!";
+                      break;
+              }
+              else
+              {
+                  parent = curr;
+                  if(del>curr->data)
+                     curr = curr->right;
+                  else
+                     curr = curr->left;
+              }
+       }
+
+    if(!flag)
+    {
+        cout<<"Data tidak ditemukan. Penghapusan tidak dilakukan."<<endl;
+        return;
+    }
+
+       //hanya satu tingkat, dengan kata lain hanya terdapat root
+       //jika hanya terdapat root, maka curr node tidak punya parent
+       if(p == 0)
+       {
+              if( curr->left== NULL && curr->right == NULL)
+              {
+                     root = NULL;
+                    
+                     return;
+              }
+       }
+       //lebih dari satu tingkat, sehingga node curr mempunyai parent
+       else if(p > 0)
+       {
+              //1. jika node yang dihapus tidak memiliki anak
+              if( curr->left== NULL && curr->right == NULL)
+              {
+                     //jika node merupakan anak kiri dari parent
+                     if(parent->left == curr)
+                     {
+                           //replace parent->kiri dengan NULL
+                           parent->left = NULL;
+                           delete curr;
+                     }
+                     else //jika node merupakan anak kanan dari parent
+                     {
+                           //replace parent->kanan dengan NULL
+                           parent->right = NULL;
+                           delete curr;
+                     }
+
+                     return;
+              }
+
+              //2. Jika node memiliki anak tunggal (anak kiri/anak kanan)
+              if((curr->left == NULL && curr->right != NULL)|| (curr->left != NULL && curr->right == NULL))
+              {
+                     //jika curr memiliki anak tunggal di sebelah kanan
+                     if(curr->left == NULL && curr->right != NULL)
+                     {
+                           //jika curr(data yang ingin dihapus) merupakan anak kiri dari parent
+                           if(parent->left == curr)
+                           {
+                              //ganti isi parent->kiri dengan curr->kanan
+                              parent->left = curr->right;
+                              delete curr;
+                         }
+                         else //jika curr(data yang ingin dihapus) bukan merupakan anak kiri dari parent
+                         {
+                              //ganti isi parent->kanan dengan curr->kanan
+                              parent->right = curr->right; 
+                              delete curr;
+                         }
+                     }
+                  else //jika curr memiliki anak tunggal di sebelah kiri
+                  {
+                           //jika curr(data yang ingin dihapus) merupakan anak kiri dari parent
+                           if(parent->left == curr)
+                           {
+                                  parent->left = curr->left; //ganti isi parent->kiri dengan curr->kiri
+                                  delete curr;
+                           }
+                           else //jika curr(data yang ingin dihapus) bukan merupakan anak kiri dari parent
+                           {
+                               parent->right = curr->left; //ganti isi parent->kanan dengan curr->kiri
+                               delete curr;
+                            }
+                   }
+                   return;
+              }
+
+
+              //3. Node dengan dua anak
+              //ganti node dengan nilai terkecil dari Sub Tree Kanan
+              if (curr->left != NULL && curr->right != NULL)
+              {
+                     //variabel bantu ini digunakan agar posisi curr asli tidak berubah, (tetap pada posisi node yang akan dihapus)
+                     //variabel bantu digunakan untuk mengarah ke suatu node
+                     tree_node* bantu;
+                     bantu = curr->right;
+
+                     //jika subtree kanan dari posisi node sekarang (curr, node yang akan dihapus) tidak memiliki anak
+                     if((bantu->left == NULL) && (bantu->right == NULL))
+                     {
+                           //ganti node curr dengan bantu
+                           // sama dengan curr = (curr->kanan)->kanan |||| semoga tidak bingung :D
+                           curr = bantu;
+                           delete bantu;
+                           curr->right = NULL;
+                     }
+                     else //jika child/anak kanan dari node curr memiliki child
+                     {
+                           //jika node child kanan dari curr memiliki child kiri
+                           if((curr->right)->left != NULL)
+                           {
+                                  //variabel bantu ini digunakan agar posisi curr asli tidak berubah, (tetap pada posisi node yang akan dihapus)
+                                  //variabel bantu digunakan untuk mengarah ke suatu node
+                                  tree_node* bantu2;
+                                  tree_node* bantu3; //berlaku sebagai parent dari bantu 2
+                                  bantu3 = curr->right;         //!perhatikan
+                                  bantu2 = (curr->right)->left; //!perhatikan
+
+                                  //mengarahkan posisi node ke node terkiri (untuk menuju ke node yang memiliki nilai terkecil)
+                                  while(bantu2->left != NULL)
+                                  {
+                                         bantu3 = bantu2;
+                                         bantu2 = bantu2->left;
+                                  }
+                                  //replace nilai dari node curr dengan nilai dari node bantu
+                                  curr->data = bantu2->data;
+                                  delete bantu2;
+                                  bantu3->left = NULL;
+                        }
+                        else //jika node child kanan dari curr tidak memiliki child kiri
+                        {
+                              tree_node* tmp;
+                              tmp = curr->right;
+                              //replace nilai dari node curr dengan nilai dari node tmp (curr->kanan)
+                              curr->data = tmp->data;
+                              curr->right = tmp->right;
+                              delete tmp;
+                        }
+
+                     }
+                     return;
+              }
+       }
+}
+
+int count(tree_node* p)
+	{
+		if(p==NULL)return 0;
+		return count(p->left) + count(p->right) + 1;
+	}
+
+int height(tree_node* p)
+	{
+		if(p==NULL)return 0;
+		int u = height(p->left),v = height(p->right);
+		if(u > v)
+		return u+1;
+		else
+		return v+1;
+	}
+
+void cari_terbesar(tree_node* p)
+	{
+		if(p==NULL)
+		return;
+		else
+		if(p->right==NULL)
+		{
+			cout<<" "<<p->data<<" ";
+			return;
+		}
+		else
+		{
+			cari_terbesar(p->right);
+			return;
+		}
+	}
+
+int main()
+	{
+		root=NULL;
+		int ch,tmp,hapus;
+
+
+		while(1)
+		{
+			system("cls");
+			cout<<endl;
+			cout<<"Menu Utama Operasi Pohon Biner"<<endl;
+			cout<<"--------------------"<<endl;
+			cout<<"1. Insert/Tambah Data"<<endl;
+			cout<<"2. Kunjungan In-Order"<<endl;
+			cout<<"3. Kunjungan Pre-Order"<<endl;
+			cout<<"4. Kunjungan Post-Order"<<endl;
+			cout<<"5. Hapus Data"<<endl;
+			cout<<"6. Menghitung Jumlah Node"<<endl;
+			cout<<"7. Menghitung Tinggi Pohon"<<endl;
+			cout<<"8. Mencari Data Terkecil"<<endl;
+			cout<<"9. Mencari Data Terbesar"<<endl;
+			cout<<"0. Exit"<<endl;
+			cout<<"Pilihan Anda : ";
+			cin>>ch;
+			cout<<endl;
+			switch(ch)
+			{
+				case 1 :
+					cout<<"Masukan Data : ";
+					cin>>tmp;
+					insert(tmp);
+				break;
+				case 2 :
+					cout<<endl;
+					cout<<"Kunjungan In-Order"<<endl;
+					cout<<"---------------"<<endl;
+					print_inorder();
+					getch();
+				break;
+				case 3 :
+					cout<<endl;
+					cout<<"Kunjungan Pre-Order"<<endl;
+					cout<<"---------------"<<endl;
+					print_preorder();
+					getch();
+				break;
+				case 4 :
+					cout<<endl;
+					cout<<"Kunjungan Post-Order"<<endl;
+					cout<<"---------------"<<endl;
+					print_postorder();
+					getch();
+				break;
+				case '5':
+                     if(root !=NULL)
+                     {
+                           cout<<"Sebelum Node Dihapus : "<<endl;
+                           cout<<"---------------------- "<<endl;
+                           //panggil fungsi untuk mencetak data secara preOrder
+                           cout<<"Pre-Order  : "<<endl;
+                           print_preorder(); //panggil fungsi
+                           cout<<"In-Order   : "<<endl;
+                           print_inorder(); //panggil fungsi
+                           cout<<"Post-Order : "<<endl;
+                           print_postorder(); //panggil fungsi
+                           cout<<"Penghapusan Data : "<<endl;
+                           cout<<"---------------------- "<<endl;
+                           printf("Masukkan data yang ingin dihapus: ");
+                           cout<<"Masukan Data Yang Ingin Dihapus : "<<endl;
+                           cin>>tmp;
+                        
+                          //panggil fungsi yang digunakan untuk melakukan penghapusan pada suatu node
+                           delete();
+                           printf("\n\nSETELAH NODE DIHAPUS : ");
+                           printf("\n---------------------- ");
+                           printf("\nPRE ORDER  : ");
+                           preOrder(pohon); //panggil fungsi
+                           printf("\nIN ORDER   : ");
+                           inOrder(pohon); //panggil fungsi
+                           printf("\nPOST ORDER : ");
+                           postOrder(pohon); //panggil fungsi
+                     }
+                     else
+                           printf("\nMasih kosong!");
+
+                     _getch();
+                     break;
+				case 6 :
+					cout<<"Menghitung Jumlah Node"<<endl;
+					cout<<"------------------"<<endl;
+					cout<<"Jumlah Node = "<<count(root);
+					getch();
+				break;
+				case 7 :
+					cout<<"Menghitung Tinggi Pohon"<<endl;
+					cout<<"------------------"<<endl;
+					cout<<"Tinggi Pohon = "<<height(root);
+					getch();
+				break;
+				case 9 :
+					cout<<"Mecari Data Terbesar"<<endl;
+					cout<<"------------------"<<endl;
+					cout<<"Data Terbesar Adalah = "<<endl;
+					cari_terbesar(root);
+					getch();
+				break;
+				case 0 :
+					return 0;
+				break;
+				default: cout<<"Pilihan yang Anda Masukkan salah!"<<endl;
+				getch();
+				break;
+			}
+		}
+	}
+  
+// BAB 1-10
+#include <iostream>
+#include <stack>
+#include <conio.h>
+using namespace std;
+
+class simpul{
+	public:
+		int data;
+		double dData;
+		Simpul* pAnakiri;
+		Simpul* pAnakKanan;
+		
+		Simpul(): iData(0),dData(0.0),pAnakKiri(NULL),pAnakKanan(NULL){}
+		~Siampul(){cout<<"X-"<< iData <<"";}
+		void tampilSimpul()
+		{
+			cout<<"{"<<iData<<","<<dData<<"}";
+		}
+		
+};
+
+class Pohon{
+	private:
+		Simpul* pAkar;
+		public:
+			Pohon():pAkar(NULL){}
+			Simpul* cari(int kunci){
+				Simpul* pSkrg = pAkar;
+				while(pSkrg->iData !=kunci)
+				{
+					if(kunci < pSkrg->iData)
+					pSkrg = pSkrg->pAnakKiri;
+					else
+					pSkrg = pSkrg->pAnakKanan;
+					if(pSkrg== NULL)
+					return NULL;
+				}
+				return pSkrg;
+			}
+			void sisip(int id, double dd){
+				Simpul* SimpulBaru = new Simpul;
+				SimpulBaru->iData = id;
+				SimpulBaru->dData = dd;
+				
+				if(pAkar==NULL)
+				pAkar = SimpulBaru;
+				else
+				{
+					Simpul* pSkrg = pAkar;
+					Simpul* pINduk;
+					while(true)
+					{
+						pInduk = pSkrg;
+						if(id < pSkrg->iData)
+						{
+							pSkrg = pSkrg->pAnakKIri;
+							if(pSkrg == NULL)
+							{
+								pInduk->pAnakKiri = SimpulBaru;
+								return;
+							}
+						}
+						else
+						{
+							pSkrg = pSkrg->pAnakKanan;
+							if(pSkrg == NULL)
+							{
+								pInduk->pAnakKanan = SImpulBaru;
+								return;
+							}
+						}
+					}
+				}
+			}
+			void jelajah(int tipeJelajah)
+			{
+				switch(tipeJelajah)
+				{
+					case 1: cout<<"\nPenjelajahan Preorder:";
+					preOrder(pAkar);
+					break;
+					case 2: cout<<"\nPenjelajahan Inorder:";
+					inOrder(pAkar);
+					break;
+					case 3: cout<<"\nPenjelajahan Postorder:";
+					postOrder(pAkar);
+					break;
+				}
+				cout<<endl;
+			}
+			void preOrder(Simpul* pAkarLokal)
+			{
+				if(pAkarLokal !=NULL)
+				{
+					cout<<pAkarLokal->iData<<"";
+					preOrder(pAkarLokal->pAnakKiri);
+					preOrder(pAkarLokal->pAnakKanan);
+				}
+			}
+			void inOrder(Simpul* pAkarLokal)
+			{
+				if(pAkarLokal !=NULL)
+				{
+					inOrder(pAkarLoker->pAnakKiri);
+					cout<<pAkarLokal->iData<<"";
+					inOrder(pAkarLokal->pAnakKanan);
+				}
+			}
+			void postOrder(Simpul* pAkarLokal)
+			{
+				if(pAkarLokal !=NULL)
+				{
+					postOrder(pAkarLokal->pAnakKiri);
+					postOrder(pAkarLokal->pAnakKanan);
+					cout<<pAkarLokal->iData<<"";
+				}
+			}
+			void tampilPohon()
+			{
+				stack<Simpul*> tumpukan;
+				tumpukan.push(pAkar);
+				int jumSpasi = 32;
+				bool apaBarisKosong = false;
+				cout<<".......................";
+				cout<<endl;
+				
+				while(apaBarisKosong==false)
+				{
+					stack<Simpul*> tumpukanLokal;
+					apaBarisKosong = true;
+					
+					for(int j=0; j<jumSpasi; j++)
+					cout<<"";
+					
+					while(tumpukan.empty()==false)
+					{
+						Simpul* temp = tumpukan.top();
+						tumpukan.pop();
+						
+						if(temp !=NULL)
+						{
+							cout<<temp->iData;
+							tumpukanLokal.push(temp->pAnakKiri);
+							tumpukanLokal.push(temp->pAnakKana);
+							
+							if(temp->pAnakKiri !=NULL || temp->pAnakKanan !=NULL)
+							apaBarisKosong = false;
+						}
+						else
+						{
+							cout<<"--";
+							tumpukanLokal.push(NULL);
+							tumpukanLokal.push(NULL);
+						}
+						for(int j=0; j<jumSpasi*2-2; j++)
+						cout<<"";
+					}
+					cout<<endl;
+					jumSpasi /=2;
+					
+					while(tumpukanLokal.empty()==false)
+					{
+						tumpukan.push(tumpukanLokal.top());
+						tumpukanLokal.pop();
+					}
+				}
+				cout<<"....................";
+				cout<< endl;
+			}
+			void hapus()
+			{hapusRekursif(pAkar);}
+			
+			void hapusRekursif(Simpul* pAkarLokal)
+			{
+				if(pAkarLokal !=NULL)
+				{
+					hapusRekursif(pAkarLokal->pAnakKiri);
+					hapusRekursif(pAkarLokal->pAnakKanan);
+					delete pAkarLokal;
+				}
+			}
+};
+int main()
+{
+	int nilai;
+	char pilihan = NULL;
+	Simpul* ditemukan;
+	Pohon pohon;
+	pohon.sisip(50, 5.0);
+	pohon.sisip(25, 2.5);
+	pohon.sisip(75, 7.5);
+	pohon.sisip(12, 1.2);
+	pohon.sisip(37. 3,7);
+	pohon.sisip(43, 4.3);
+	pohon.sisip(30, 3.0);
+	pohon.sisip(33, 3.3);
+	pohon.sisip(87, 8.7);
+	pohon.sisip(93, 9.3);
+	pohon.sisip(97, 9.7);
+	
+	while(pilihan !='k')
+	{
+		cout<<"masukan huruf pertama dari ";
+		cout<<"tampil, sisip, cari, jelajah, atau keluar: ";
+		cin>>ppilihan;
+		
+		switch(pilihan)
+		{
+			case 't':
+				pohon.tampilPohon();
+				break;
+				
+				case's':
+					cout<<"memasukan nilai yang akan disisipkan: ";
+					cin>>nilai;
+					pohon.sisip(nilai, nilai + 0.9);
+					break;
+					
+					case 'c':
+						cout<<"memasukan nilai yang akan dicari: ";
+						cin>>nilai;
+						ditemukan = pohon.cari(niali);
+						
+						if(ditemukan != NULL)
+						{
+							cout<<"Ditemukan: ";
+							ditemukan-> tampilSimpul();
+							cout<<endl;
+						}
+						else
+						cout<<"tidak ditemukan."<<nilai<<endl;
+						break;
+						
+						case 'j':
+							cout<<"memasukan tipe jelajah (1 = preorder,"<< "2 = inorder, 3 = postorder):";
+							cin>>nilai;
+							pohon.hapus();
+							cout<<endl;
+							break;
+							
+							default:
+								cout<<"Entri tak-valid\n";
+		}
+	}
+	getch();
+	return 0;
+}
+
+//SERANAI GANDA
+#include <iostream>
+#include <conio.h>
+using namespace std;
+
+class Simpul{
+	public:
+		double dData;
+		Simpul* pBrktnya;
+		Simpul* pSblmnya;
+		
+		public:
+			Simpul(double dd):
+				dData(dd), pBrktnya(NULL), pSblmnya(NULL)
+				{}
+				void tampilSeranai()
+				{ cout<<dData<<"";}
+};
+class SeranaiBerantaiGanda
+{
+	private:
+		Simpul* pPertama;
+		Simpul* pAkhir;
+		
+		public:
+			SenaraiBerantaiGanda(): pPertama(NULL), pAkhir(NULL)
+			{}
+			~SenaraiBerantaiGanda()
+			{
+				Simpul* pSkrg = pPertama;
+				while(pSkrg != NULL)
+				{
+					Simpul* pLama = pSkrg;
+					pSkrg = pSkrg->pBrktnya;
+					delete pLama;
+				}
+			}
+			
+			bool apaKosong()
+			{return pPertama==NULL;}
+			void sisipPertama(double dd)
+			{
+				Simpul* pSimpulBaru = new Simpul(dd);
+				if(apaKosong())
+				pAkhir = pSimpulBaru;
+			}
+			void sisipAkhir(double dd)
+			{
+				Simpul* pSimpulBaru = new Simpul(dd);
+				if(apaKosong())
+				pPertama = pSimpulBaru;
+				else
+				{
+					pAkhir->pBrktnya = pSimpulBaru;
+					pSimpulBaru->pSblmnya = pAkhir;
+				}
+				pAkhir = pSimpulBaru;
+			}
+			void hapusPertama()
+			{
+				Simpul* pTemp = pPertama;
+				if(pPertama->pBrktnya == NULL)
+				pAkhir = NULL;
+				else
+				pPertama->pBrktnya->pSblmnya = NULL;
+				pPertama = pPertama->pBrktnya;
+				delete pTemp;
+			}
+			void hapusAkhir()
+			{
+				Simpul* pTemp = pAkhir;
+				if(pPertama->pBrktnya == NULL)
+				pPertama = NULL;
+				else
+				pAkhir->pSblmnya->pBrktnya = NULL;
+				pAkhir = pAkhir->pSblmnya;
+				delete pTemp;
+			}
+			bool sisipSetelah(double kunci, double dd)
+			{
+				Simpul* pSkrg = pPertama;
+				while(pSkrg->dData != kunci)
+				{
+					pSkrg = pSkrg->pBrktnya;
+					if(pSkrg == NULL)
+					return false;
+				}
+				Simpul* pSimpulBaru = new Simpul(dd);
+				if(pSkrg==pAkhir)
+				{
+					pSimpulBaru->pBrktnya = NULL;
+					pAkhir = pSimpulBaru;
+				}
+				else
+				{
+					pSimpulBaru->pBrktnya = pSkrg->pBrktnya;
+					pSkrg->pBrktnya->pSblmnya = pSimpulBaru;
+				}
+				pSimpulBaru->pSblmnya = pSkrg;
+				pSkrg->pBrktnya = pSimpulBaru;
+				return true;
+			}
+			bool hapusKunci(double kunci)
+			{
+				Simpul* pSkrg = pPertama;
+				while(pSkrg->dData != kunci)
+				{
+					pSkrg = pSkrg->pBrktnya;
+					if(pSkrg == NULL)
+					return false;
+				}
+				if(pSkrg==pPertama)
+				pPertama = pSkrg->pBrktnya;
+				else
+				pSkrg->pSblmnya->pBrktnya = pSkrg->pBrktnya;
+				if(pSkrg==pAkhir)
+				pAkhir = pSkrg->pSblmnya;
+				else
+				pSkrg->pBrktnya->pSblmnya = pSkrg->pSblmnya;
+				delete pSkrg;
+				return true;
+			}
+			void tampilMaju()
+			{
+				cout<<"Senarai (pertama-->akhir):";
+				Simpul* pSkrg = pPertama;
+				while(pSkrg !=NULL)
+				{
+					pSkrg->tampilSeranai();
+					pSkrg = pSkrg->pBrktnya;
+				}
+				cout<<endl;
+			}
+			void tampilMundur()
+			{
+				cout<<"Seranai(akhir-->pertama):";
+				Simpul* pSkrg = pAkhir;
+				while(pSkrg != NULL)
+				{
+					pSkrg->tampilSeranai();
+					pSkrg = pSkrg->pSblmnya;
+				}
+				cout<<endl;
+			}
+};
+int main()
+{
+	SeranaiBerantaiGanda seranai;
+	seranai.sisipPertama(22);
+	seranai.sisipPertama(44);
+	seranai.sisipPertama(66);
+	
+	seranai.sisipAkhir(11);
+	seranai.sisipAkhir(33);
+	seranai.sisipAkhir(55);
+	
+	seranai.tampilMaju();
+	seranai.tampilMundur();
+	
+	cout<<"menghapus simpul pertama, simpul akhir, dan 11"<<endl;
+	seranai.hapusPertama();
+	seranai.hapusAkhir();
+	seranai.hapusKunci(11);
+	
+	seranai.tampilMaju();
+	cout<<"Menyisipkan 77 setelah simpul 22, dan 88 setelah 33"<<endl;
+	seranai.sisipSetelah(22, 77);
+	seranai.sisipSetelah(33, 88);
+	seranai.tampilMaju();
+	
+	getch();
+	return 0;
+}
